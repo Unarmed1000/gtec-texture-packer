@@ -260,8 +260,8 @@ namespace TexturePacker.Input
 
     public static ImmutableComplexPatchSlice ParseAsImmutableComplexPatchSlice(ReadOnlySpan<char> value)
     {
-      if (value == null)
-        throw new ArgumentNullException(nameof(value));
+      if (value.IsEmpty)
+        throw new ArgumentException("Value can not be empty", nameof(value));
 
       ComplexPatchSliceFlags flags = ComplexPatchSliceFlags.None;
       if (value.EndsWith(")"))
@@ -285,8 +285,8 @@ namespace TexturePacker.Input
 
     public static ImmutableContentSlice ParseAsImmutableContentSlice(ReadOnlySpan<char> value)
     {
-      if (value == null)
-        throw new ArgumentNullException(nameof(value));
+      if (value.IsEmpty)
+        throw new ArgumentException("Value can not be empty", nameof(value));
 
       ContentSliceFlags flags = ContentSliceFlags.None;
 
