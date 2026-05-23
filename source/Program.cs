@@ -50,7 +50,7 @@ namespace TexturePacker
   {
     public const int VersionMajor = 1;
     public const int VersionMinor = 5;
-    public const int VersionPatch = 0;
+    public const int VersionPatch = 1;
 
     private const int PROGRAM_RESULT_SUCCESS = 0;
     private const int PROGRAM_RESULT_ERROR = 1;
