@@ -36,6 +36,6 @@
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.5" />
     <PackageReference Include="ManaBattery.MB.Base_Minimal" Version="0.0.5" />
     <PackageReference Include="ManaBattery.MB.Graphics2_Minimal" Version="0.0.3" />
-    <PackageReference Include="ManaBattery.MB.Encoder.TextureAtlas.BTA" Version="0.0.5" />
+    <PackageReference Include="ManaBattery.MB.Encoder.TextureAtlas.BTA" Version="0.0.6" />
   </ItemGroup>
 </Project>

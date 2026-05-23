@@ -800,7 +800,8 @@ namespace TexturePacker
         Debug.Assert(dstIdx == atlasEntries.Length);
       }
 
-      return new BasicTextureAtlas(atlasEntries, nineSliceEntries.ToArray(), patchEntries.ToArray(), anchorPointEntries.ToArray(), defaultDpi);
+      var extentPx = new PxExtent2D(UncheckedNumericCast.ToUInt32(packResult.Size.Width), UncheckedNumericCast.ToUInt32(packResult.Size.Height));
+      return new BasicTextureAtlas(atlasEntries, nineSliceEntries.ToArray(), patchEntries.ToArray(), anchorPointEntries.ToArray(), extentPx, defaultDpi);
     }
 
     private static void ProcessAnchorPoints(List<NamedAnchorPoints> anchorPointEntries, AtlasElement source, string name)
