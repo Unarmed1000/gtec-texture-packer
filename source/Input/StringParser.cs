@@ -124,7 +124,25 @@ namespace TexturePacker.Input
       {
         return TransparencyMode.PremultiplyUsingLinearColors;
       }
-      throw new NotSupportedException($"Unsupported TransparencyMode '{value}', allowed values: {{'normal', 'premultiply', 'premultiply-linear'}}");
+      if (value == "opaque")
+      {
+        return TransparencyMode.Opaque;
+      }
+      throw new NotSupportedException($"Unsupported TransparencyMode '{value}', allowed values: {{'normal', 'premultiply', 'premultiply-linear', 'opaque'}}");
+    }
+
+    // Parses a packed 0xAARRGGBB color. Accepts an optional '0x', '0X' or '#' prefix.
+    public static UInt32 ParseAsColor(string value)
+    {
+      string str = value.Trim();
+      if (str.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+        str = str.Substring(2);
+      else if (str.StartsWith("#", StringComparison.Ordinal))
+        str = str.Substring(1);
+
+      if (!UInt32.TryParse(str, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out UInt32 result))
+        throw new NotSupportedException($"Invalid color '{value}', expected a hex value like '0xAARRGGBB' (e.g. '0xFF000000' for opaque black)");
+      return result;
     }
 
     public static LicenseFormat ParseAsLicenseFormat(string value)

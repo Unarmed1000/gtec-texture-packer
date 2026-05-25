@@ -362,7 +362,7 @@ namespace TexturePacker.Input
       var activeAtlasElement = new AtlasElementConfig(defaultDpi, defaultAtlasElement.Extrude, defaultAtlasElement.Trim, defaultAtlasElement.TrimMargin,
                                                       defaultAtlasElement.TransparencyThreshold, defaultAtlasElement.ShapePadding,
                                                       defaultAtlasElement.BorderPadding);
-      var activeDefaultAtlasConfig = new AtlasConfig(defaultConfig.Atlas.TransparencyMode, defaultConfig.Atlas.Texture, defaultConfig.Atlas.Layout, activeAtlasElement);
+      var activeDefaultAtlasConfig = new AtlasConfig(defaultConfig.Atlas.TransparencyMode, defaultConfig.Atlas.Texture, defaultConfig.Atlas.Layout, activeAtlasElement, defaultConfig.Atlas.FillColor);
       var activeConfig = new CreateAtlasConfig(outputAtlasFormat, activeDefaultAtlasConfig, defaultConfig.AddBitmapFont);
       var (atlasConfig, modifiedTransparencyMode, atlasCommands) = ParseAtlasChildren(element, activeConfig);
 
@@ -372,7 +372,7 @@ namespace TexturePacker.Input
         {
           throw new Exception($"CreateAtlas Attribute '{CreateAtlasAttribute_OutputAtlasFormat}' was specified and a sub AtlasConfig with a different transparency mode was specified. Remove one of them");
         }
-        atlasConfig = new AtlasConfig(transparencyModeOverride, atlasConfig.Texture, atlasConfig.Layout, atlasConfig.Element);
+        atlasConfig = new AtlasConfig(transparencyModeOverride, atlasConfig.Texture, atlasConfig.Layout, atlasConfig.Element, atlasConfig.FillColor);
       }
 
       return new CommandCreateAtlas(atlasFileSourceDirectoryPath, name, sourcePath, licenseFile, atlasConfig, atlasCommands, outputAtlasFormat);

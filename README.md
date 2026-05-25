@@ -74,10 +74,19 @@ OutputAtlasFormat    | Set the default atlas format. Can be: *bta3, bta4, bta4C#
 
 Name                 | Description
 ---------------------|-------------------------
-TransparencyMode     | Set the transparency mode. Can be: *normal, premultiply, premultiply-linear*
+TransparencyMode     | Set the transparency mode. Can be: *normal, premultiply, premultiply-linear, opaque*
+FillColor            | (optional) `0xAARRGGBB` color used to fill the atlas background before drawing when `TransparencyMode="opaque"`. Ignored in all other modes. Defaults to `0xFF000000` (opaque black).
 
 ```xml
 <AtlasConfig TransparencyMode="premultiply">
+  ...
+</AtlasConfig>
+```
+
+When the atlas is known to be fully opaque, use `opaque` to fill the unused gaps between sprites with a solid color instead of leaving them transparent:
+
+```xml
+<AtlasConfig TransparencyMode="opaque" FillColor="0xFF000000">
   ...
 </AtlasConfig>
 ```

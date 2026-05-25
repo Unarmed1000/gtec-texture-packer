@@ -50,7 +50,7 @@ namespace TexturePacker
   {
     public const int VersionMajor = 1;
     public const int VersionMinor = 5;
-    public const int VersionPatch = 6;
+    public const int VersionPatch = 7;
 
     private const int PROGRAM_RESULT_SUCCESS = 0;
     private const int PROGRAM_RESULT_ERROR = 1;
@@ -539,7 +539,7 @@ namespace TexturePacker
       var textureConfig = new AtlasTextureConfig(new PxSize2D(2048, 2048), TextureSizeRestriction.Pow2);
       var layoutConfig = new AtlasLayoutConfig(false);
       var elementConfig = new AtlasElementConfig(160, 1, true, 1, 1, 2, 2);
-      return new AtlasConfig(transparencyMode, textureConfig, layoutConfig, elementConfig);
+      return new AtlasConfig(transparencyMode, textureConfig, layoutConfig, elementConfig, 0xFF000000u);
     }
 
     private static AddBitmapFontConfig GetDefaultAddBitmapFontConfig()

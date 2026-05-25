@@ -41,16 +41,23 @@ namespace TexturePacker.Config
     public readonly AtlasLayoutConfig Layout;
     public readonly AtlasElementConfig Element;
 
-    public AtlasConfig(TransparencyMode transparencyMode, AtlasTextureConfig textureConfig, AtlasLayoutConfig layout, AtlasElementConfig element)
+    /// <summary>
+    /// Packed 0xAARRGGBB background fill color, applied to the atlas canvas before drawing when
+    /// <see cref="TransparencyMode"/> is <see cref="TransparencyMode.Opaque"/>. Ignored in all other modes.
+    /// </summary>
+    public readonly UInt32 FillColor;
+
+    public AtlasConfig(TransparencyMode transparencyMode, AtlasTextureConfig textureConfig, AtlasLayoutConfig layout, AtlasElementConfig element, UInt32 fillColor)
     {
       TransparencyMode = transparencyMode;
       Texture = textureConfig;
       Layout = layout;
       Element = element;
+      FillColor = fillColor;
     }
 
     public static bool operator ==(AtlasConfig lhs, AtlasConfig rhs)
-      => lhs.TransparencyMode == rhs.TransparencyMode && lhs.Texture == rhs.Texture && lhs.Layout == rhs.Layout && lhs.Element == rhs.Element;
+      => lhs.TransparencyMode == rhs.TransparencyMode && lhs.Texture == rhs.Texture && lhs.Layout == rhs.Layout && lhs.Element == rhs.Element && lhs.FillColor == rhs.FillColor;
 
     public static bool operator !=(AtlasConfig lhs, AtlasConfig rhs) => !(lhs == rhs);
 
@@ -58,7 +65,7 @@ namespace TexturePacker.Config
     public override bool Equals([NotNullWhen(true)] object? obj) => obj is AtlasConfig objValue && (this == objValue);
 
 
-    public override int GetHashCode() => HashCode.Combine(TransparencyMode, Texture, Layout, Element);
+    public override int GetHashCode() => HashCode.Combine(TransparencyMode, Texture, Layout, Element, FillColor);
 
 
     public bool Equals(AtlasConfig other) => this == other;

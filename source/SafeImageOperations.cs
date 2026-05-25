@@ -275,6 +275,21 @@ namespace TexturePacker
       }
     }
 
+    // Fills the entire image with the supplied color
+    public void Clear(Rgba32 color)
+    {
+      if (m_isDisposed)
+        throw new ObjectDisposedException(nameof(SafeImage));
+      if (m_image == null)
+        return;
+
+      var span = m_image.GetLegacyPixelSpan();
+      for (int i = 0; i < span.Length; ++i)
+      {
+        span[i] = color;
+      }
+    }
+
     public void Premultiply()
     {
       if (m_isDisposed)

@@ -90,9 +90,11 @@ namespace TexturePacker.Input
     };
 
     private const string AtlasConfigAttribute_TransparencyMode = "TransparencyMode";
+    private const string AtlasConfigAttribute_FillColor = "FillColor";
     private static readonly string[] AtlasConfigAttributes =
     {
       AtlasConfigAttribute_TransparencyMode,
+      AtlasConfigAttribute_FillColor,
     };
 
     private const string AddBitmapFontConfigAttribute_FontType = "Type";
@@ -267,6 +269,8 @@ namespace TexturePacker.Input
       if (!rModifiedTransparencyMode)
         transparencyMode = defaultValues.TransparencyMode;
 
+      var fillColor = XmlUtil.GetAttributeValueAsColor(element, AtlasConfigAttribute_FillColor, defaultValues.FillColor);
+
       var textureConfig = defaultValues.Texture;
       var layoutConfig = defaultValues.Layout;
       var elementConfig = defaultValues.Element;
@@ -291,7 +295,7 @@ namespace TexturePacker.Input
           throw new NotSupportedException($"Unsupported element '{decendant.Name}', allowed elements are: {string.Join(", ", ElementAtlasConfigConfigElements)}");
         }
       }
-      return new AtlasConfig(transparencyMode, textureConfig, layoutConfig, elementConfig);
+      return new AtlasConfig(transparencyMode, textureConfig, layoutConfig, elementConfig, fillColor);
     }
 
 

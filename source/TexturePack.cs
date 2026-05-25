@@ -690,11 +690,15 @@ namespace TexturePacker
       return new PackedElements(srcAtlasImages, duplicatedAtlasImages);
     }
 
-    private static SafeImage CreateAtlasImage(TextureBinPacker.PackResult packResult, PxPoint2 offsetPx, TransparencyMode transparencyMode)
+    private static SafeImage CreateAtlasImage(TextureBinPacker.PackResult packResult, PxPoint2 offsetPx, TransparencyMode transparencyMode, UInt32 fillColor)
     {
       Debug.Assert(packResult.IsValid);
 
       var atlasImage = new SafeImage(packResult.Size);
+
+      // For an opaque atlas, fill the canvas (including the gaps between sprites) before drawing the images on top
+      if (transparencyMode == TransparencyMode.Opaque)
+        atlasImage.Clear(ToRgba32(fillColor));
 
       var filteredImages = new List<PackedAtlasImage>(packResult.Images.Count);
       DrawImages(packResult.Size, packResult.Images, offsetPx, atlasImage, AtlasImageType.Normal, filteredImages);
@@ -1076,7 +1080,7 @@ namespace TexturePacker
         g_logger.Trace("Packed to {0}x{0} texture", res.Size.Width, res.Size.Height);
 
         {
-          using (var atlasImage = CreateAtlasImage(res, new PxPoint2(minBorderMarginLeft, minBorderMarginLeft), createAtlasCmd.Config.TransparencyMode))
+          using (var atlasImage = CreateAtlasImage(res, new PxPoint2(minBorderMarginLeft, minBorderMarginLeft), createAtlasCmd.Config.TransparencyMode, createAtlasCmd.Config.FillColor))
           { // Save the atlas image
             IOUtil.CreateFileDirectoryIfMissing(createAtlasCmd.DstAtlasFilename.AbsolutePath);
             SaveImageIfModified(createAtlasCmd.DstAtlasFilename.AbsolutePath, atlasImage, commandSettings.OverwritePolicy);
@@ -1145,9 +1149,22 @@ namespace TexturePacker
         case TransparencyMode.PremultiplyUsingLinearColors:
           atlasImage.PremultiplyUsingLinearColors();
           return;
+        case TransparencyMode.Opaque:
+          // The opaque background fill is applied in CreateAtlasImage before drawing, so nothing to do here
+          return;
         default:
           throw new NotSupportedException($"Unsupported transparency mode: {transparencyMode}");
       }
+    }
+
+    // Unpacks a 0xAARRGGBB color into a Rgba32 pixel
+    private static Rgba32 ToRgba32(UInt32 argb)
+    {
+      byte a = (byte)((argb >> 24) & 0xFF);
+      byte r = (byte)((argb >> 16) & 0xFF);
+      byte g = (byte)((argb >> 8) & 0xFF);
+      byte b = (byte)(argb & 0xFF);
+      return new Rgba32(r, g, b, a);
     }
 
     private static Dictionary<UInt32, PackedAtlasImage> FilterToFontChars(PackedDict packedDict, BitmapFont bitmapFont)

@@ -37,5 +37,6 @@ namespace TexturePacker
     Normal = 0,
     Premultiply = 1,
     PremultiplyUsingLinearColors = 2,
+    Opaque = 3,
   }
 }

@@ -253,6 +253,17 @@ namespace TexturePacker.Input
       return (result != null ? StringParser.ParseAsTransparencyMode(result) : defaultValue);
     }
 
+    public static UInt32 GetAttributeValueAsColor(XElement xmlElement, string attributeName, UInt32 defaultValue)
+    {
+      if (xmlElement == null)
+      {
+        throw new ArgumentNullException(nameof(xmlElement));
+      }
+
+      var result = TryGetAttributeValueAsString(xmlElement, attributeName);
+      return (result != null ? StringParser.ParseAsColor(result) : defaultValue);
+    }
+
     public static bool TryGetAttributeValueAsTransparencyMode(XElement xmlElement, string attributeName, out TransparencyMode rResult)
     {
       if (xmlElement == null)
