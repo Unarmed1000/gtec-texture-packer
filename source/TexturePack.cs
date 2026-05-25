@@ -247,7 +247,7 @@ namespace TexturePacker
       g_logger.Trace("- Loading image {0}", bitmapPath);
 
       SafeImage? dummyEmptyImage = null;
-      using (var fontImage = new SafeImage(Image.Load<Rgba32>(bitmapPath)))
+      using (var fontImage = LoadSafeImageOrThrow(bitmapPath))
       {
         var result = new AtlasBitmapFontElement[bitmapFont.Chars.Length];
         for (int i = 0; i < bitmapFont.Chars.Length; ++i)
@@ -291,7 +291,7 @@ namespace TexturePacker
       g_logger.Trace("- Loading image {0}", bitmapPath);
 
       SafeImage? dummyEmptyImage = null;
-      using (var fontImage = new SafeImage(Image.Load<Rgba32>(bitmapPath)))
+      using (var fontImage = LoadSafeImageOrThrow(bitmapPath))
       {
         switch (bitmapFont.FontType)
         {
@@ -360,7 +360,7 @@ namespace TexturePacker
           if (File.Exists(bitmapPath))
           {
             g_logger.Trace("- Loading image {0}", bitmapPath);
-            using (var fontImage = new SafeImage(Image.Load<Rgba32>(bitmapPath)))
+            using (var fontImage = LoadSafeImageOrThrow(bitmapPath))
             {
               if (fontImage.Size.Width > 0 && fontImage.Size.Height > 0)
               {
@@ -444,12 +444,25 @@ namespace TexturePacker
       return CreateImageAtlasElement(cmd.ImageFile, cmd.CreateRelativeAtlasPath(cmd.ImageFile.AtlasPath.AbsolutePath));
     }
 
+    // Loads an image, wrapping any decoder/IO failure with the offending file path so the user knows which file to fix
+    private static SafeImage LoadSafeImageOrThrow(string filePath)
+    {
+      try
+      {
+        return new SafeImage(Image.Load<Rgba32>(filePath));
+      }
+      catch (Exception ex)
+      {
+        throw new Exception($"Failed to load image '{filePath}': {ex.Message}", ex);
+      }
+    }
+
     private static AtlasElement CreateImageAtlasElement(ResolvedImageFile srcImageFile, string sourcePath)
     {
       var filePath = srcImageFile.Path.AbsolutePath;
       g_logger.Trace("- Loading image '{0}' with dpi of {1}", filePath, srcImageFile.Dpi);
 
-      var image = new SafeImage(Image.Load<Rgba32>(filePath));
+      var image = LoadSafeImageOrThrow(filePath);
 
       AtlasElementPatchInfo? patchInfo = null;
       if (srcImageFile.IsPatch)
@@ -545,7 +558,7 @@ namespace TexturePacker
 
       AtlasElementPatchInfo? patchInfo = rImage.TryProcessPatchInfo();
       if (patchInfo == null)
-        throw new Exception("Failed to acquire patch info");
+        throw new Exception($"Failed to read nine-slice/patch markers from '{debugPath}'. The 1px border must contain valid patch and content markers.");
 
       // Remove the 'patch' area
       {

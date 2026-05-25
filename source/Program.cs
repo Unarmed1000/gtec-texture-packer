@@ -50,7 +50,7 @@ namespace TexturePacker
   {
     public const int VersionMajor = 1;
     public const int VersionMinor = 5;
-    public const int VersionPatch = 5;
+    public const int VersionPatch = 6;
 
     private const int PROGRAM_RESULT_SUCCESS = 0;
     private const int PROGRAM_RESULT_ERROR = 1;
@@ -286,7 +286,8 @@ namespace TexturePacker
       {
         if (ex is AggregateException)
         {
-          var aggregateException = (AggregateException)ex;
+          // Flatten so nested aggregates surface their real leaf messages instead of the generic "One or more errors occurred."
+          var aggregateException = ((AggregateException)ex).Flatten();
           foreach (var innerEx in aggregateException.InnerExceptions)
           {
             g_logger.Error(innerEx, "ERROR: {0}", innerEx);
