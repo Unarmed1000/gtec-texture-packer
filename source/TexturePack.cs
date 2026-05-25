@@ -52,6 +52,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 using TexturePacker.Atlas;
 using TexturePacker.Commands;
@@ -972,6 +973,68 @@ namespace TexturePacker
       return new PackedDict(lookupDict);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1305:Specify IFormatProvider", Justification = "Diagnostic message")]
+    private static string BuildPackFailureMessage(ResolvedCommandCreateAtlas createAtlasCmd, List<AtlasImageInfo> elementsToPack,
+                                                  int borderMarginLeft, int borderMarginRight)
+    {
+      var maxSize = createAtlasCmd.Config.Texture.MaxSize;
+      int shapePadding = createAtlasCmd.Config.Element.ShapePadding;
+      bool allowRotation = createAtlasCmd.Config.Layout.AllowRotation;
+
+      // The packer can only use the area left after reserving the border on each side
+      int usableWidth = Math.Max(maxSize.Width - (borderMarginLeft + borderMarginRight), 0);
+      int usableHeight = Math.Max(maxSize.Height - (borderMarginLeft + borderMarginRight), 0);
+      long usableAreaPx = (long)usableWidth * usableHeight;
+
+      // Sizes here are the trimmed/cropped sizes that are actually packed
+      long totalAreaPx = 0;
+      var oversized = new List<string>();
+      foreach (var element in elementsToPack)
+      {
+        int w = element.SrcRectPx.Width + shapePadding;
+        int h = element.SrcRectPx.Height + shapePadding;
+        totalAreaPx += (long)w * h;
+
+        bool fits = w <= usableWidth && h <= usableHeight;
+        if (!fits && allowRotation)
+          fits = h <= usableWidth && w <= usableHeight;
+        if (!fits)
+        {
+          var src = (AtlasElement)element.SourceTag;
+          oversized.Add($"  '{src.SourcePath}' is {element.SrcRectPx.Width}x{element.SrcRectPx.Height}px (trimmed)");
+        }
+      }
+
+      var sb = new StringBuilder();
+      sb.Append($"Failed to pack {elementsToPack.Count} element(s) into atlas '{createAtlasCmd.Name}'. ");
+      sb.Append($"Max texture size is {maxSize.Width}x{maxSize.Height} (SizeRestriction: {createAtlasCmd.Config.Texture.SizeRestriction}, ");
+      sb.Append($"usable {usableWidth}x{usableHeight} after {borderMarginLeft + borderMarginRight}px border, {shapePadding}px shape padding).");
+
+      if (oversized.Count > 0)
+      {
+        sb.Append(Environment.NewLine);
+        sb.Append($"{oversized.Count} element(s) are individually too large to fit{(allowRotation ? " (even when rotated)" : "")}:");
+        sb.Append(Environment.NewLine);
+        sb.Append(string.Join(Environment.NewLine, oversized));
+        sb.Append(Environment.NewLine);
+        sb.Append("Increase the atlas MaxSize, or reduce/split these images.");
+      }
+      else if (totalAreaPx > usableAreaPx)
+      {
+        sb.Append(Environment.NewLine);
+        sb.Append($"Combined element area ({totalAreaPx:N0}px²) exceeds the usable atlas area ({usableAreaPx:N0}px²), so they cannot all fit in one atlas.");
+        sb.Append(Environment.NewLine);
+        sb.Append("Increase the atlas MaxSize or split the content across multiple atlases.");
+      }
+      else
+      {
+        sb.Append(Environment.NewLine);
+        sb.Append($"Combined element area ({totalAreaPx:N0}px²) fits within the usable atlas area ({usableAreaPx:N0}px²), but the packer could not arrange them ");
+        sb.Append("(awkward aspect ratios leave too much wasted space). Try increasing MaxSize" + (allowRotation ? "." : " or enabling rotation (AllowRotation)."));
+      }
+      return sb.ToString();
+    }
+
     private static ReadonlyGeneratedAtlasInformation? TryCreateAtlas(ResolvedCommandCreateAtlas createAtlasCmd, in CommandSettings commandSettings, bool generateAtlasInformation)
     {
       g_logger.Trace(nameof(TryCreateAtlas));
@@ -995,7 +1058,7 @@ namespace TexturePacker
         var packer = new TextureBinPacker(createAtlasCmd.Config.Texture.MaxSize, createAtlasCmd.Config.Texture.SizeRestriction, createAtlasCmd.Config.Layout.AllowRotation, borderReservedPx);
         TextureBinPacker.PackResult res = packer.TryProcess(packElements.ElementsToPack);
         if (!res.IsValid)
-          throw new Exception("Failed to pack elements");
+          throw new Exception(BuildPackFailureMessage(createAtlasCmd, packElements.ElementsToPack, minBorderMarginLeft, minBorderMarginRight));
 
         g_logger.Trace("Packed to {0}x{0} texture", res.Size.Width, res.Size.Height);
 
